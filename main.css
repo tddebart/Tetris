@@ -7,8 +7,8 @@ div {
 }
 
 .mainBorder {
-    width: 512px;
-    height: 862px;
+    width: 510px;
+    height: 860px;
     border: 5px solid aqua;
     position: absolute;
     display: flex;
@@ -23,14 +23,19 @@ div {
     margin: 0;
 }
 .grid {
-    width: 502px;
-    height: 852px;
+    width: 100%;
+    height: 100%;
     }
-    .gridItem {
-        width:51px;
-        height:51px;
-        border: 1px solid black;
+    .gridRow {
+        width: max-content;
+        height: 50px;
     }
+        .gridItem {
+            width:50px;
+            height:50px;
+            border: 1px solid gray;
+            float:left;
+        }
 
 
 .hold {
@@ -94,10 +99,9 @@ div {
 }
 
 .block {
-    width: 51px;
-    height: 51px;
     background: red;
-    position: absolute; }
+    border: 0;
+     }
     .block-color {
         width: 40px;
         height: 40px;
