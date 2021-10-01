@@ -1,5 +1,7 @@
 let curBlockPosX = []
 let curBlockPosY = []
+let curTopLeftCorX = 4;
+let curTopLeftCorY = 0;
 const grid = document.getElementById('grid')
 let currentBlock;
 
@@ -23,7 +25,7 @@ function createGrid() {
 function move(xM,yM) {
     for (y = 0; y < curBlockPosY.length; y++) {
         if((curBlockPosY[y] + yM) >= 17 || (curBlockPosY[y] + yM) < 0) {
-            spawnCube()
+            spawnTeri()
             return;
         }
     }
@@ -36,7 +38,7 @@ function move(xM,yM) {
     for (y = 0; y < curBlockPosY.length; y++) {
             if(grid.children[curBlockPosY[y]+yM].children[curBlockPosX[y]+xM].className.includes('block') && !grid.children[curBlockPosY[y]+yM].children[curBlockPosX[y]+xM].className.includes('moving')) {
                 if(yM!==0) {
-                    spawnCube()
+                    spawnTeri()
                 }
                 return;
             }
@@ -48,6 +50,8 @@ function move(xM,yM) {
         curBlockPosY[y] += yM
         curBlockPosX[y] += xM
     }
+    curTopLeftCorX += xM;
+    curTopLeftCorY += yM;
 
     for (y = 0; y < curBlockPosY.length; y++) {
             grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block moving'
@@ -90,11 +94,11 @@ function moveAllLinesDown(upBlocks) {
 }
 
 window.setInterval(function() {
-    move(0,1)
+    //move(0,1)
 
 }, 500)
 
-function spawnCube() {
+function spawnTeri() {
 
     // reset previous block
     for (y = 0; y < curBlockPosY.length; y++) {
@@ -103,34 +107,48 @@ function spawnCube() {
     }
     checkForLines()
 
-    const rand = getRndInteger(0, types.length-1)
+    while (true) {
+        const rand = getRndInteger(0, types.length-1)
 
-    for (i = 0; i < types[rand].xPos.length; i++) {
-        const x = (types[rand].xPos[i])+4
-        const y = types[rand].yPos[i]
+        if(parseInt(types[rand].id[types[rand].id.length-1]) === 1) {
+            for (i = 0; i < types[rand].xPos.length; i++) {
+                const x = (types[rand].xPos[i])+4
+                const y = types[rand].yPos[i]
 
-        grid.children[y].children[x].className += ' block moving'
-        curBlockPosX[i] = x
-        curBlockPosY[i] = y
+                grid.children[y].children[x].className += ' block moving'
+                curBlockPosX[i] = x
+                curBlockPosY[i] = y
+            }
+            currentBlock = types[rand]
+            curTopLeftCorX = 4;
+            curTopLeftCorY = 0;
+            break;
+        }
     }
+
     //move(4,0)
 }
 
 function rotate() {
-    let morBlockPos = [];
-    for(x = 0; x < curBlockPosX.length; x++) {
-        morBlockPos[x] = curBlockPosY[x] + curBlockPosX[0] - curBlockPosY[0]
-    }
-    for(y = 0; y < curBlockPosY.length; y++) {
-        curBlockPosY[y] = curBlockPosX[0] + curBlockPosY[0] - curBlockPosY[y]
-    }
-    curBlockPosX = morBlockPos;
+    let currentId = parseInt(currentBlock.id[currentBlock.id.length-1])
+    if(currentId === 4) currentId = 0
+    const type = currentBlock.id.replace(/[0-9]/g, '')
 
     clearCurrentBlock()
 
-    for (y = 0; y < curBlockPosY.length; y++) {
-        grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block moving'
+    const nexBlock = types.find(value => {
+        if(value.id === type+(currentId+1)) return true;
+    })
+
+    for (i = 0; i < nexBlock.xPos.length; i++) {
+        const x = (nexBlock.xPos[i])+curTopLeftCorX
+        const y = (nexBlock.yPos[i])+curTopLeftCorY
+
+        grid.children[y].children[x].className = 'gridItem block moving'
+        curBlockPosX[i] = x
+        curBlockPosY[i] = y
     }
+    currentBlock = nexBlock;
 }
 
 document.onkeydown = function (e) {
@@ -143,7 +161,7 @@ document.onkeydown = function (e) {
     } else if(e.key === "ArrowUp") {
         rotate()
     } else if(e.key === 'k') {
-        spawnCube()
+        spawnTeri()
     }
 }
 
