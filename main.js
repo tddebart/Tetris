@@ -54,7 +54,7 @@ function move(xM,yM) {
     curTopLeftCorY += yM;
 
     for (y = 0; y < curBlockPosY.length; y++) {
-            grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block moving'
+            grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block moving ' + currentBlock.color;
     }
 }
 
@@ -85,8 +85,8 @@ function moveAllLinesDown(upBlocks) {
     for (let y = upBlocks-1; y > 0; y--) {
         for (x = 0; x < 10; x++) {
             if(grid.children[y].children[x].className.includes('block')) {
+                grid.children[y+1].children[x].className = grid.children[y].children[x].className
                 grid.children[y].children[x].className = 'gridItem'
-                grid.children[y+1].children[x].className = 'gridItem block'
 
             }
         }
@@ -94,7 +94,7 @@ function moveAllLinesDown(upBlocks) {
 }
 
 window.setInterval(function() {
-    //move(0,1)
+    move(0,1)
 
 }, 500)
 
@@ -102,7 +102,7 @@ function spawnTeri() {
 
     // reset previous block
     for (y = 0; y < curBlockPosY.length; y++) {
-        grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block'
+        grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block ' + currentBlock.color;
 
     }
     checkForLines()
@@ -115,7 +115,7 @@ function spawnTeri() {
                 const x = (types[rand].xPos[i])+4
                 const y = types[rand].yPos[i]
 
-                grid.children[y].children[x].className += ' block moving'
+                grid.children[y].children[x].className += ' block moving ' + types[rand].color;
                 curBlockPosX[i] = x
                 curBlockPosY[i] = y
             }
@@ -144,7 +144,7 @@ function rotate() {
         const x = (nexBlock.xPos[i])+curTopLeftCorX
         const y = (nexBlock.yPos[i])+curTopLeftCorY
 
-        grid.children[y].children[x].className = 'gridItem block moving'
+        grid.children[y].children[x].className = 'gridItem block moving ' + currentBlock.color;
         curBlockPosX[i] = x
         curBlockPosY[i] = y
     }

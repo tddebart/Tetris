@@ -99,7 +99,7 @@ div {
 }
 
 .block {
-    background: red;
+
     border: 0;
      }
     .block-color {
@@ -109,6 +109,34 @@ div {
         margin: 6px;
 
     }
+
+.Yellow {
+    background: yellow;
+}
+
+.DarkBlue{
+    background: darkblue;
+}
+
+.Orange {
+    background: #feaa00;
+}
+
+.Blue {
+    background: #01ffff;
+}
+
+.Green {
+    background: #00ff01;
+}
+
+.Purple {
+    background: #9900fe;
+}
+
+.Red {
+    background: red;
+}
 
 .canvas {
 
