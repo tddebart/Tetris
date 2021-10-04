@@ -30,34 +30,53 @@ div {
         width: max-content;
         height: 50px;
     }
+    .gridRowSmall {
+        width: max-content;
+        height: 30px;
+    }
         .gridItem {
             width:50px;
             height:50px;
             border: 1px solid gray;
             float:left;
         }
+        .gridItemSmall {
+            width:30px;
+            height:30px;
+            /*border: 1px solid gray;*/
+            float:left;
+        }
 
 
 .hold {
-    width: 140px;
+    width: 139px;
     border: 5px solid aqua;
-    margin-left: -140px;
+    margin-left: -139px;
     margin-top: -5px;
-    height: 20%;
+    height: 161px;
     border-radius: 5px 0 5px 5px;
+    padding: 10px 5px 5px;
 }
 .hold-text {
     background: aqua;
     text-align: center;
     font-family: Fixed, sans-serif;
+    margin: -10px -5px -5px;
 }
+
+.hold-holder {
+    padding-top: 9px;
+    background: rgba(255, 255, 255, 0)
+}
+
 .incoming {
     width: 70px;
     border: 5px solid aqua;
     border-top: 0;
     margin-left: -70px;
-    height: 692px;
+    /*height: 692px;*/
     border-radius: 0 0 0 5px;
+    flex: 1 1 auto;
 }
 
 .next {
@@ -82,6 +101,7 @@ div {
     /*margin-top: 15px;*/
     margin-right: -140px;
     height: 266px;
+    /*flex: 1 1 auto;*/
     border-radius: 0 0 5px 0;
 }
 .stats-text {
@@ -110,6 +130,13 @@ div {
 
     }
 
+.leftHolder, .rightHolder {
+    display: flex;
+    flex-flow: column;
+    width: 0;
+    height: 855px;
+}
+
 .Yellow {
     background: yellow;
 }
@@ -136,8 +163,4 @@ div {
 
 .Red {
     background: red;
-}
-
-.canvas {
-
 }

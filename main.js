@@ -3,7 +3,10 @@ let curBlockPosY = []
 let curTopLeftCorX = 4;
 let curTopLeftCorY = 0;
 const grid = document.getElementById('grid')
+const hold = document.getElementById('hold-Holder')
 let currentBlock;
+let currentHold;
+let isRotating;
 
 
 createGrid()
@@ -19,10 +22,25 @@ function createGrid() {
             row.appendChild(block)
         }
     }
+
+    for (y = 0; y < 4; y++) {
+            const row = document.createElement('div')
+            row.className = 'gridRowSmall'
+            hold.appendChild(row)
+            for (x = 0; x < 4; x++) {
+                const block = document.createElement('div')
+                block.className = 'gridItemSmall'
+                row.appendChild(block)
+            }
+    }
 }
 
 
 function move(xM,yM) {
+    if(isRotating) return;
+    isMoving = true;
+    if(currentBlock == null) return;
+
     for (y = 0; y < curBlockPosY.length; y++) {
         if((curBlockPosY[y] + yM) >= 17 || (curBlockPosY[y] + yM) < 0) {
             spawnTeri()
@@ -44,7 +62,7 @@ function move(xM,yM) {
             }
     }
 
-    clearCurrentBlock()
+    ClearCurrentBlock()
 
     for (y = 0; y < curBlockPosY.length; y++) {
         curBlockPosY[y] += yM
@@ -56,11 +74,17 @@ function move(xM,yM) {
     for (y = 0; y < curBlockPosY.length; y++) {
             grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block moving ' + currentBlock.color;
     }
+    isMoving = false;
 }
 
-function clearCurrentBlock() {
+function ClearCurrentBlock() {
+    for (i = 0; i < currentBlock.xPos.length; i++) {
+        const x = (currentBlock.xPos[i]) + curTopLeftCorX
+        const y = (currentBlock.yPos[i]) + curTopLeftCorY
+        grid.children[y].children[x].className = 'gridItem'
+    }
     for (y = 0; y < curBlockPosY.length; y++) {
-            grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem'
+        grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem'
     }
 }
 
@@ -98,17 +122,29 @@ window.setInterval(function() {
 
 }, 500)
 
-function spawnTeri() {
+function spawnTeri(spawnNumber = -1) {
 
     // reset previous block
     for (y = 0; y < curBlockPosY.length; y++) {
-        grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block ' + currentBlock.color;
+        if(grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className.includes('block')) {
+            grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block ' + currentBlock.color;
+        }
     }
+
+    holdThisMove = false;
 
     checkForLines()
 
     while (true) {
-        const rand = getRndInteger(0, types.length-1)
+        let rand;
+        if (spawnNumber === -1) {
+            rand = getRndInteger(0, types.length-1)
+        } else if(parseInt(types[spawnNumber].id[types[spawnNumber].id.length-1]) !== 1) {
+            const supSpawn = types[spawnNumber];
+            rand = types.findIndex(b => b.id.includes(supSpawn.id.slice(0,-1)))
+        } else {
+            rand = spawnNumber;
+        }
 
         if(parseInt(types[rand].id[types[rand].id.length-1]) === 1) {
             for (i = 0; i < types[rand].xPos.length; i++) {
@@ -147,6 +183,8 @@ function DetectIfBlock(x,y) {
 }
 
 function rotate() {
+    if(isMoving) return;
+    isRotating = true;
     let currentId = parseInt(currentBlock.id[currentBlock.id.length-1])
     if(currentId === 4) currentId = 0
     const type = currentBlock.id.replace(/[0-9]/g, '')
@@ -171,9 +209,10 @@ function rotate() {
         if(DetectIfBlock(x,y)) {
             return;
         }
+        isRotating = false;
     }
 
-    clearCurrentBlock()
+    ClearCurrentBlock()
 
     for (i = 0; i < nexBlock.xPos.length; i++) {
         const x = (nexBlock.xPos[i])+curTopLeftCorX
@@ -184,6 +223,43 @@ function rotate() {
         curBlockPosY[i] = y
     }
     currentBlock = nexBlock;
+}
+
+function ClearHold() {
+    for (y = 0; y < 4; y++) {
+        for (x = 0; x < 4; x++) {
+            hold.children[y].children[x].className = 'gridItemSmall'
+        }
+    }
+}
+
+function Hold() {
+    if(currentBlock == null) return;
+    if(holdThisMove) return;
+    ClearHold();
+    ClearCurrentBlock()
+    for (i = 0; i < currentBlock.xPos.length; i++) {
+        let x = currentBlock.xPos[i]
+        let y = currentBlock.yPos[i]+1
+
+        if(currentBlock.id.includes('cube')) {
+            x++;
+        }
+
+        if(currentBlock.id.includes('straight')) {
+            y--;
+        }
+
+        hold.children[y].children[x].className = 'gridItemSmall block ' + currentBlock.color;
+    }
+    const wasBlock = currentBlock;
+    if(currentHold === undefined) {
+        spawnTeri()
+    } else {
+        spawnTeri(types.findIndex((e) => e.id === currentHold.id))
+    }
+    currentHold = wasBlock;
+    holdThisMove = true;
 }
 
 document.onkeydown = function (e) {
@@ -199,6 +275,8 @@ document.onkeydown = function (e) {
         spawnTeri()
     } else if(e.key === ' ') {
         HardDrop()
+    } else if(e.key === "Shift") {
+        Hold()
     }
 }
 
