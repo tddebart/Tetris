@@ -43,7 +43,7 @@ div {
         .gridItemSmall {
             width:30px;
             height:30px;
-            border: 1px solid gray;
+            /*border: 1px solid gray;*/
             float:left;
         }
 
@@ -120,17 +120,11 @@ div {
     /*transition: 0.05s;*/
 }
 
-.block {
+.block, .preview {
 
     border: 0;
-     }
-    .block-color {
-        width: 40px;
-        height: 40px;
-        background: darkred;
-        margin: 6px;
+}
 
-    }
 
 .leftHolder, .rightHolder {
     display: flex;
@@ -165,4 +159,7 @@ div {
 
 .Red {
     background: red;
+}
+.Gray {
+    background: gray;
 }

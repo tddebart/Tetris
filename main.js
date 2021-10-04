@@ -1,5 +1,9 @@
 let curBlockPosX = []
 let curBlockPosY = []
+
+let prevPosX = []
+let prevPosY = []
+
 let curTopLeftCorX = 4;
 let curTopLeftCorY = 0;
 const grid = document.getElementById('grid')
@@ -11,41 +15,36 @@ let isRotating;
 let nextNumbers = [];
 
 
-createGrid()
+CreateGrids()
 for (g = 0; g < 5; g++) {
     CreateNumber()
 }
-CreateNext()
+CreateNextPreview()
 
-function createGrid() {
-    for (y = 0; y < 17; y++) {
+function CreateGrids() {
+    CreateGrid(grid, 10,17)
+
+    CreateGrid(hold, 4, 4, true)
+
+    CreateGrid(next, 4, 19, true)
+}
+
+function CreateGrid(parent, xAmount, yAmount, small = false) {
+    for (y = 0; y < yAmount; y++) {
         const row = document.createElement('div')
-        row.className = 'gridRow'
-        grid.appendChild(row)
-        for (x = 0; x < 10; x++) {
-            const block = document.createElement('div')
-            block.className = 'gridItem'
-            row.appendChild(block)
-        }
-    }
-
-    for (y = 0; y < 4; y++) {
-            const row = document.createElement('div')
+        if(small) {
             row.className = 'gridRowSmall'
-            hold.appendChild(row)
-            for (x = 0; x < 4; x++) {
-                const block = document.createElement('div')
-                block.className = 'gridItemSmall'
-                row.appendChild(block)
-            }
-    }
-    for (y = 0; y < 19; y++) {
-        const row = document.createElement('div')
-        row.className = 'gridRowSmall'
-        next.appendChild(row)
-        for (x = 0; x < 4; x++) {
+        } else {
+            row.className = 'gridRow'
+        }
+        parent.appendChild(row)
+        for (x = 0; x < xAmount; x++) {
             const block = document.createElement('div')
-            block.className = 'gridItemSmall'
+            if(small) {
+                block.className = 'gridItemSmall'
+            } else {
+                block.className = 'gridItem'
+            }
             row.appendChild(block)
         }
     }
@@ -61,7 +60,7 @@ function CreateNumber() {
     }
 }
 
-function CreateNext() {
+function CreateNextPreview() {
     for (y = 0; y < 19; y++) {
         for (x = 0; x < 4; x++) {
             next.children[y].children[x].className = 'gridItemSmall'
@@ -126,6 +125,48 @@ function move(xM,yM) {
             grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block moving ' + currentBlock.color;
     }
     isMoving = false;
+    UpdateDropPreview()
+}
+
+function UpdateDropPreview() {
+    let done = false;
+    let extraYs = [0, 0, 0, 0];
+    for (i = 0; i < currentBlock.xPos.length; i++) {
+        while(!done) {
+            const x = (currentBlock.xPos[i]) + curTopLeftCorX
+            const y = (currentBlock.yPos[i]) + curTopLeftCorY + extraYs[i]
+
+            if((y > 16 || DetectIfBlock(x,y))) {
+                break;
+            } else {
+                extraYs[i] = extraYs[i]+1;
+            }
+        }
+    }
+    const howFarDown = extraYs.reduce((a, b) => Math.min(a, b))-1
+    ClearDropPreview();
+    if(howFarDown < 4) return;
+    for (i = 0; i < currentBlock.xPos.length; i++) {
+        const x = (currentBlock.xPos[i]) + curTopLeftCorX
+        const y = (currentBlock.yPos[i]) + curTopLeftCorY + howFarDown
+
+        prevPosX.push(x)
+        prevPosY.push(y)
+
+        grid.children[y].children[x].className = 'gridItem preview Gray'
+    }
+}
+
+function ClearDropPreview() {
+    for (i = 0; i < prevPosX.length; i++) {
+        const x = (prevPosX[i])
+        const y = (prevPosY[i])
+
+        if(grid.children[y].children[x].className.includes('preview')) {
+            grid.children[y].children[x].className = 'gridItem'
+
+        }
+    }
 }
 
 function ClearCurrentBlock() {
@@ -192,7 +233,7 @@ function spawnTeri(spawnNumber = -1) {
             rand = nextNumbers[0]
             CreateNumber()
             nextNumbers.shift()
-            CreateNext()
+            CreateNextPreview()
         } else if(parseInt(types[spawnNumber].id[types[spawnNumber].id.length-1]) !== 1) {
             const supSpawn = types[spawnNumber];
             rand = types.findIndex(b => b.id.includes(supSpawn.id.slice(0,-1)))
@@ -212,13 +253,14 @@ function spawnTeri(spawnNumber = -1) {
             currentBlock = types[rand]
             curTopLeftCorX = 4;
             curTopLeftCorY = 0;
+            UpdateDropPreview()
             break;
         }
     }
 }
 
 function HardDrop() {
-    for (j = 0; j < 15; j++) {
+    for (j = 0; j < 16; j++) {
         for (i = 0; i < currentBlock.xPos.length; i++) {
             const x = (currentBlock.xPos[i])+curTopLeftCorX
             const y = (currentBlock.yPos[i])+curTopLeftCorY+1
@@ -277,6 +319,7 @@ function rotate() {
         curBlockPosY[i] = y
     }
     currentBlock = nexBlock;
+    UpdateDropPreview()
 }
 
 function ClearHold() {
