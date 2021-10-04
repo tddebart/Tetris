@@ -103,8 +103,8 @@ function spawnTeri() {
     // reset previous block
     for (y = 0; y < curBlockPosY.length; y++) {
         grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block ' + currentBlock.color;
-
     }
+
     checkForLines()
 
     while (true) {
@@ -125,8 +125,25 @@ function spawnTeri() {
             break;
         }
     }
+}
 
-    //move(4,0)
+function HardDrop() {
+    for (j = 0; j < 15; j++) {
+        for (i = 0; i < currentBlock.xPos.length; i++) {
+            const x = (currentBlock.xPos[i])+curTopLeftCorX
+            const y = (currentBlock.yPos[i])+curTopLeftCorY+1
+
+            if(y > 16 || DetectIfBlock(x,y)) {
+                move(0,1)
+                return;
+            }
+        }
+        move(0,1)
+    }
+}
+
+function DetectIfBlock(x,y) {
+    return !(grid.children[y].children[x].className.includes('moving')) && grid.children[y].children[x].className.includes('block')
 }
 
 function rotate() {
@@ -137,9 +154,6 @@ function rotate() {
         if(value.id === type+(currentId+1)) return true;
     })
 
-    let adXPos = [];
-    let adYPos = [];
-
     for (i = 0; i < nexBlock.xPos.length; i++) {
         while ((nexBlock.xPos[i])+curTopLeftCorX < 0) {
             curTopLeftCorX++
@@ -147,24 +161,23 @@ function rotate() {
         while ((nexBlock.xPos[i])+curTopLeftCorX > 9) {
             curTopLeftCorX--;
         }
+        while((nexBlock.yPos[i])+curTopLeftCorY > 16) {
+            curTopLeftCorY--;
+        }
 
         const x = (nexBlock.xPos[i])+curTopLeftCorX
         const y = (nexBlock.yPos[i])+curTopLeftCorY
 
-        if(!(grid.children[y].children[x].className.includes('moving')) && grid.children[y].children[x].className.includes('block')) {
+        if(DetectIfBlock(x,y)) {
             return;
         }
-
-        adXPos.push(nexBlock.xPos[i])
-        adYPos.push(nexBlock.yPos[i])
     }
 
     clearCurrentBlock()
 
-
-    for (i = 0; i < adXPos.length; i++) {
-        const x = (adXPos[i])+curTopLeftCorX
-        const y = (adYPos[i])+curTopLeftCorY
+    for (i = 0; i < nexBlock.xPos.length; i++) {
+        const x = (nexBlock.xPos[i])+curTopLeftCorX
+        const y = (nexBlock.yPos[i])+curTopLeftCorY
 
         grid.children[y].children[x].className = 'gridItem block moving ' + currentBlock.color;
         curBlockPosX[i] = x
@@ -184,6 +197,8 @@ document.onkeydown = function (e) {
         rotate()
     } else if(e.key === 'k') {
         spawnTeri()
+    } else if(e.key === ' ') {
+        HardDrop()
     }
 }
 
