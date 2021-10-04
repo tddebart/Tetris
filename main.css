@@ -43,7 +43,7 @@ div {
         .gridItemSmall {
             width:30px;
             height:30px;
-            /*border: 1px solid gray;*/
+            border: 1px solid gray;
             float:left;
         }
 
@@ -64,7 +64,7 @@ div {
     margin: -10px -5px -5px;
 }
 
-.hold-holder {
+.hold-holder, .next-holder {
     padding-top: 9px;
     background: rgba(255, 255, 255, 0)
 }
@@ -85,13 +85,15 @@ div {
     /*border-bottom: 15px solid aqua;*/
     margin-right: -140px;
     margin-top: -5px;
-    height: 70%;
+    height: 75%;
     border-radius: 0 5px 0 0;
+    padding: 10px 5px 5px;
 }
 .next-text {
     background: aqua;
     text-align: center;
     font-family: Fixed, sans-serif;
+    margin: -10px -5px -5px;
 }
 
 .stats {

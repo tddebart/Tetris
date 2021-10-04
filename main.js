@@ -4,12 +4,18 @@ let curTopLeftCorX = 4;
 let curTopLeftCorY = 0;
 const grid = document.getElementById('grid')
 const hold = document.getElementById('hold-Holder')
+const next = document.getElementById('next-holder')
 let currentBlock;
 let currentHold;
 let isRotating;
+let nextNumbers = [];
 
 
 createGrid()
+for (g = 0; g < 5; g++) {
+    CreateNumber()
+}
+CreateNext()
 
 function createGrid() {
     for (y = 0; y < 17; y++) {
@@ -33,8 +39,53 @@ function createGrid() {
                 row.appendChild(block)
             }
     }
+    for (y = 0; y < 19; y++) {
+        const row = document.createElement('div')
+        row.className = 'gridRowSmall'
+        next.appendChild(row)
+        for (x = 0; x < 4; x++) {
+            const block = document.createElement('div')
+            block.className = 'gridItemSmall'
+            row.appendChild(block)
+        }
+    }
 }
 
+function CreateNumber() {
+    while(true) {
+        const rand = getRndInteger(0, types.length-1)
+        if(parseInt(types[rand].id[types[rand].id.length-1]) === 1) {
+            nextNumbers.push(rand);
+            break;
+        }
+    }
+}
+
+function CreateNext() {
+    for (y = 0; y < 19; y++) {
+        for (x = 0; x < 4; x++) {
+            next.children[y].children[x].className = 'gridItemSmall'
+        }
+    }
+
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < types[nextNumbers[i]].xPos.length; j++) {
+            const type = types[nextNumbers[i]]
+            let x = type.xPos[j]
+            let y = type.yPos[j]+1+i*4
+
+            if(type.id.includes('cube')) {
+                x++;
+            }
+
+            if(type.id.includes('straight')) {
+                y--;
+            }
+
+            next.children[y].children[x].className = 'gridItemSmall block ' + type.color;
+        }
+    }
+}
 
 function move(xM,yM) {
     if(isRotating) return;
@@ -138,7 +189,10 @@ function spawnTeri(spawnNumber = -1) {
     while (true) {
         let rand;
         if (spawnNumber === -1) {
-            rand = getRndInteger(0, types.length-1)
+            rand = nextNumbers[0]
+            CreateNumber()
+            nextNumbers.shift()
+            CreateNext()
         } else if(parseInt(types[spawnNumber].id[types[spawnNumber].id.length-1]) !== 1) {
             const supSpawn = types[spawnNumber];
             rand = types.findIndex(b => b.id.includes(supSpawn.id.slice(0,-1)))
