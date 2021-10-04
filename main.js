@@ -133,16 +133,38 @@ function rotate() {
     let currentId = parseInt(currentBlock.id[currentBlock.id.length-1])
     if(currentId === 4) currentId = 0
     const type = currentBlock.id.replace(/[0-9]/g, '')
-
-    clearCurrentBlock()
-
     const nexBlock = types.find(value => {
         if(value.id === type+(currentId+1)) return true;
     })
 
+    let adXPos = [];
+    let adYPos = [];
+
     for (i = 0; i < nexBlock.xPos.length; i++) {
+        while ((nexBlock.xPos[i])+curTopLeftCorX < 0) {
+            curTopLeftCorX++
+        }
+        while ((nexBlock.xPos[i])+curTopLeftCorX > 9) {
+            curTopLeftCorX--;
+        }
+
         const x = (nexBlock.xPos[i])+curTopLeftCorX
         const y = (nexBlock.yPos[i])+curTopLeftCorY
+
+        if(!(grid.children[y].children[x].className.includes('moving')) && grid.children[y].children[x].className.includes('block')) {
+            return;
+        }
+
+        adXPos.push(nexBlock.xPos[i])
+        adYPos.push(nexBlock.yPos[i])
+    }
+
+    clearCurrentBlock()
+
+
+    for (i = 0; i < adXPos.length; i++) {
+        const x = (adXPos[i])+curTopLeftCorX
+        const y = (adYPos[i])+curTopLeftCorY
 
         grid.children[y].children[x].className = 'gridItem block moving ' + currentBlock.color;
         curBlockPosX[i] = x
