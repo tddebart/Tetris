@@ -133,6 +133,25 @@ div {
     height: 855px;
 }
 
+.score {
+    color: white;
+    text-align: center;
+}
+
+.endText {
+    position: absolute;
+    color: white;
+    background: transparent;
+    width: 100%;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 80px;
+    text-overflow: clip;
+    display: none;
+}
+
 .Yellow {
     background: yellow;
 }

@@ -13,6 +13,9 @@ let currentBlock;
 let currentHold;
 let isRotating;
 let nextNumbers = [];
+let end = false;
+
+const pointForLines = [0,100,300,500,800]
 
 
 CreateGrids()
@@ -20,6 +23,10 @@ for (g = 0; g < 5; g++) {
     CreateNumber()
 }
 CreateNextPreview()
+document.getElementById('highScore').textContent = localStorage.getItem('hScore')
+if(document.getElementById('highScore').textContent === "") {
+    document.getElementById('highScore').textContent = "0"
+}
 
 function CreateGrids() {
     CreateGrid(grid, 10,17)
@@ -181,6 +188,7 @@ function ClearCurrentBlock() {
 }
 
 function checkForLines() {
+    let howManyLines = 0;
     for (y = 0; y < 17; y++) {
         let good = 0
         for (x = 0; x < 10; x++) {
@@ -193,8 +201,12 @@ function checkForLines() {
                grid.children[y].children[x].className = 'gridItem'
             }
             moveAllLinesDown(y)
+            howManyLines++;
         }
     }
+    document.getElementById('score').textContent = (parseInt(document.getElementById('score').textContent)+pointForLines[howManyLines]).toString()
+
+    UpdateHighScore();
 }
 
 function moveAllLinesDown(upBlocks) {
@@ -231,6 +243,15 @@ function spawnTeri(spawnNumber = -1) {
         let rand;
         if (spawnNumber === -1) {
             rand = nextNumbers[0]
+            for (i = 0; i < types[rand].xPos.length; i++) {
+                const x = (types[rand].xPos[i])+4
+                const y = types[rand].yPos[i]
+
+                if(DetectIfBlock(x,y)) {
+                    endGame();
+                    return;
+                }
+            }
             CreateNumber()
             nextNumbers.shift()
             CreateNextPreview()
@@ -257,6 +278,21 @@ function spawnTeri(spawnNumber = -1) {
             break;
         }
     }
+}
+
+function endGame() {
+    document.getElementById('end').style.display = 'unset';
+    isEnd = true;
+}
+
+function UpdateHighScore() {
+    const currentHighScore = parseInt(document.getElementById('highScore').textContent)
+    const currentScore = parseInt(document.getElementById('score').textContent)
+
+    if(currentScore > currentHighScore) {
+        document.getElementById('highScore').textContent = currentScore.toString()
+    }
+    localStorage.setItem('hScore', currentScore.toString())
 }
 
 function HardDrop() {
@@ -360,6 +396,7 @@ function Hold() {
 }
 
 document.onkeydown = function (e) {
+    if(end) return;
     if(e.key === "ArrowRight") {
         move (1,0)
     } else if(e.key === "ArrowLeft") {
