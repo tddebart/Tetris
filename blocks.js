@@ -34,3 +34,4 @@ types = [
     iSPiece3 = {id: 'iSPiece3', xPos: [0,1,1,2], yPos: [1,1,2,2], color: "Red"},
     iSPiece4 = {id: 'iSPiece4', xPos: [0,0,1,1], yPos: [2,1,1,0], color: "Red"},
 ]
+pointForLines = [0,100,300,500,800]

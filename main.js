@@ -6,58 +6,62 @@ let prevPosY = []
 
 let curTopLeftCorX = 4;
 let curTopLeftCorY = 0;
+
 const grid = document.getElementById('grid')
 const hold = document.getElementById('hold-Holder')
 const next = document.getElementById('next-holder')
+
 let currentBlock;
 let currentHold;
+
+let isMoving;
 let isRotating;
-let nextNumbers = [];
 let end = false;
 
-const pointForLines = [0,100,300,500,800]
+let nextNumbers = [];
 
-
+// Create the 3 grids
 CreateGrids()
+// Generate the randomNumbers for the upcoming 5 blocks
 for (g = 0; g < 5; g++) {
-    CreateNumber()
+    GenerateNumber()
 }
+// Create the preview on the right side for the upcoming blocks
 CreateNextPreview()
+
+// Set the highscore to the local storage highscore
 document.getElementById('highScore').textContent = localStorage.getItem('hScore')
 if(document.getElementById('highScore').textContent === "") {
     document.getElementById('highScore').textContent = "0"
 }
 
 function CreateGrids() {
+    // Main grid
     CreateGrid(grid, 10,17)
 
+    // Hold grid
     CreateGrid(hold, 4, 4, true)
 
+    // Next grid
     CreateGrid(next, 4, 19, true)
+
+    end = false;
 }
 
 function CreateGrid(parent, xAmount, yAmount, small = false) {
     for (y = 0; y < yAmount; y++) {
         const row = document.createElement('div')
-        if(small) {
-            row.className = 'gridRowSmall'
-        } else {
-            row.className = 'gridRow'
-        }
+        row.className = (small) ? 'gridRowSmall' : 'gridRow'
         parent.appendChild(row)
         for (x = 0; x < xAmount; x++) {
             const block = document.createElement('div')
-            if(small) {
-                block.className = 'gridItemSmall'
-            } else {
-                block.className = 'gridItem'
-            }
+            block.className = (small) ? 'gridItemSmall' : 'gridItem'
             row.appendChild(block)
         }
     }
 }
 
-function CreateNumber() {
+function GenerateNumber() {
     while(true) {
         const rand = getRndInteger(0, types.length-1)
         if(parseInt(types[rand].id[types[rand].id.length-1]) === 1) {
@@ -68,6 +72,7 @@ function CreateNumber() {
 }
 
 function CreateNextPreview() {
+    // Clear the next preview
     for (y = 0; y < 19; y++) {
         for (x = 0; x < 4; x++) {
             next.children[y].children[x].className = 'gridItemSmall'
@@ -94,13 +99,13 @@ function CreateNextPreview() {
 }
 
 function move(xM,yM) {
-    if(isRotating) return;
+    if(isRotating || currentBlock == null) return;
     isMoving = true;
-    if(currentBlock == null) return;
 
+    // Check if
     for (y = 0; y < curBlockPosY.length; y++) {
         if((curBlockPosY[y] + yM) >= 17 || (curBlockPosY[y] + yM) < 0) {
-            spawnTeri()
+            spawnPiece()
             return;
         }
     }
@@ -111,15 +116,15 @@ function move(xM,yM) {
     }
 
     for (y = 0; y < curBlockPosY.length; y++) {
-            if(grid.children[curBlockPosY[y]+yM].children[curBlockPosX[y]+xM].className.includes('block') && !grid.children[curBlockPosY[y]+yM].children[curBlockPosX[y]+xM].className.includes('moving')) {
+            if(DetectIfBlock(curBlockPosX[y]+xM, curBlockPosY[y]+yM)) {
                 if(yM!==0) {
-                    spawnTeri()
+                    spawnPiece()
                 }
                 return;
             }
     }
 
-    ClearCurrentBlock()
+    ClearCurBlockVis()
 
     for (y = 0; y < curBlockPosY.length; y++) {
         curBlockPosY[y] += yM
@@ -176,7 +181,7 @@ function ClearDropPreview() {
     }
 }
 
-function ClearCurrentBlock() {
+function ClearCurBlockVis() {
     for (i = 0; i < currentBlock.xPos.length; i++) {
         const x = (currentBlock.xPos[i]) + curTopLeftCorX
         const y = (currentBlock.yPos[i]) + curTopLeftCorY
@@ -226,9 +231,9 @@ window.setInterval(function() {
 
 }, 500)
 
-function spawnTeri(spawnNumber = -1) {
+function spawnPiece(spawnNumber = -1) {
 
-    // reset previous block
+    // solid previous block
     for (y = 0; y < curBlockPosY.length; y++) {
         if(grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className.includes('block')) {
             grid.children[curBlockPosY[y]].children[curBlockPosX[y]].className = 'gridItem block ' + currentBlock.color;
@@ -252,7 +257,7 @@ function spawnTeri(spawnNumber = -1) {
                     return;
                 }
             }
-            CreateNumber()
+            GenerateNumber()
             nextNumbers.shift()
             CreateNextPreview()
         } else if(parseInt(types[spawnNumber].id[types[spawnNumber].id.length-1]) !== 1) {
@@ -344,7 +349,7 @@ function rotate() {
         isRotating = false;
     }
 
-    ClearCurrentBlock()
+    ClearCurBlockVis()
 
     for (i = 0; i < nexBlock.xPos.length; i++) {
         const x = (nexBlock.xPos[i])+curTopLeftCorX
@@ -358,7 +363,7 @@ function rotate() {
     UpdateDropPreview()
 }
 
-function ClearHold() {
+function ClearHoldVis() {
     for (y = 0; y < 4; y++) {
         for (x = 0; x < 4; x++) {
             hold.children[y].children[x].className = 'gridItemSmall'
@@ -369,32 +374,35 @@ function ClearHold() {
 function Hold() {
     if(currentBlock == null) return;
     if(holdThisMove) return;
-    ClearHold();
-    ClearCurrentBlock()
+    ClearHoldVis();
+    ClearCurBlockVis()
     for (i = 0; i < currentBlock.xPos.length; i++) {
         let x = currentBlock.xPos[i]
-        let y = currentBlock.yPos[i]+1
+        let y = currentBlock.yPos[i]
 
+        // If its a cube move it a bit to the left
         if(currentBlock.id.includes('cube')) {
             x++;
         }
 
-        if(currentBlock.id.includes('straight')) {
-            y--;
+        // If its not a straight piece move it down a bit
+        if(!currentBlock.id.includes('straight')) {
+            y++;
         }
 
         hold.children[y].children[x].className = 'gridItemSmall block ' + currentBlock.color;
     }
     const wasBlock = currentBlock;
     if(currentHold === undefined) {
-        spawnTeri()
+        spawnPiece()
     } else {
-        spawnTeri(types.findIndex((e) => e.id === currentHold.id))
+        spawnPiece(types.findIndex((e) => e.id === currentHold.id))
     }
     currentHold = wasBlock;
     holdThisMove = true;
 }
 
+// Key presses for the actions
 document.onkeydown = function (e) {
     if(end) return;
     if(e.key === "ArrowRight") {
@@ -405,8 +413,8 @@ document.onkeydown = function (e) {
         move (0,1)
     } else if(e.key === "ArrowUp") {
         rotate()
-    } else if(e.key === 'k') {
-        spawnTeri()
+    } else if(e.key === 'k' && currentBlock === undefined) {
+        spawnPiece()
     } else if(e.key === ' ') {
         HardDrop()
     } else if(e.key === "Shift") {
